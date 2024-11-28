@@ -87,6 +87,7 @@ def calculate_goal():
         target_amount = float(data['target_amount'])
         timeline_months = int(data['timeline_months'])
         predicted_savings = float(data['predicted_savings'])
+        risk_category = data.get('risk_category', 'Moderate Risk')
 
         # Calculate required monthly savings
         required_monthly_savings = target_amount / timeline_months
@@ -96,12 +97,49 @@ def calculate_goal():
 
         # Recommendations based on gap
         recommendations = []
+        term_type = ""
+
+        # Classify investment goals based on the timeline
+        if timeline_months <= 12:
+            term_type = "Short-Term"
+        elif 12 < timeline_months <= 60:
+            term_type = "Mid-Term"
+        else:
+            term_type = "Long-Term"
+
+        # Recommendations for savings gap
         if savings_gap > 0:
             recommendations.append(f"Reduce discretionary expenses by ₹{savings_gap:.2f} per month.")
-            recommendations.append("Consider investing in high-return instruments like mutual funds or stocks.")
-            recommendations.append("Explore additional income opportunities.")
+            recommendations.append("Consider increasing savings to close the gap.")
         else:
             recommendations.append("You are on track to meet your goal. Maintain your current savings!")
+
+        # Investment suggestions tailored to risk category and timeline
+        if term_type == "Short-Term":
+            if risk_category == "Low Risk":
+                recommendations.append("Invest in Fixed Deposits, Treasury Bills, or Liquid Funds for secure, short-term returns.")
+            elif risk_category == "Moderate Risk":
+                recommendations.append("Allocate funds to Ultra Short-Term Debt Funds or Conservative Hybrid Funds for moderate growth.")
+            elif risk_category == "High Risk":
+                recommendations.append("Explore Arbitrage Funds or Short-Term Equity Funds for higher returns with managed risk.")
+
+        elif term_type == "Mid-Term":
+            if risk_category == "Low Risk":
+                recommendations.append("Opt for Debt Mutual Funds or Post Office Savings Schemes for stable returns.")
+            elif risk_category == "Moderate Risk":
+                recommendations.append("Invest in Balanced Mutual Funds or Index Funds to balance growth and risk.")
+            elif risk_category == "High Risk":
+                recommendations.append("Consider Sectoral Mutual Funds or Real Estate Investment Trusts (REITs) for potential high returns.")
+
+        elif term_type == "Long-Term":
+            if risk_category == "Low Risk":
+                recommendations.append("Stick to Public Provident Fund (PPF), Sukanya Samriddhi Yojana, or Long-Term Bonds for safety.")
+            elif risk_category == "Moderate Risk":
+                recommendations.append("Diversify with Blue-Chip Stocks, Balanced Mutual Funds, or National Pension Scheme (NPS).")
+            elif risk_category == "High Risk":
+                recommendations.append("Maximize growth through Equity Mutual Funds, Small-Cap Stocks, or Cryptocurrencies.")
+
+        recommendations.append(f"Since your goal is categorized as a {term_type} goal, ensure liquidity aligns with your needs.")
 
         return jsonify({
             "Required_Monthly_Savings": required_monthly_savings,
